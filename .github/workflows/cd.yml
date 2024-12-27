@@ -3,7 +3,7 @@ name: CD
 on:
   push:
     branches:
-      - main
+      - 3-require-manual-approval-for-terraform-apply
 
 jobs:
   terraform:
@@ -30,3 +30,14 @@ jobs:
 
       - name: Terraform plan
         run: terraform plan -out=tfplan
+
+      - name: Manual approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: gsistelos
+          issue-title: "Deploying infrastructure changes to production"
+          issue-body: "Please review the planned changes and approve if everything looks correct."
+
+      - name: Terraform apply
+        run: terraform apply tfplan
