@@ -9,6 +9,9 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
+    permissions:
+      issues: write
+
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -30,3 +33,14 @@ jobs:
 
       - name: Terraform plan
         run: terraform plan -out=tfplan
+
+      - name: Manual approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: gsistelos
+          issue-title: "Deploying infrastructure changes to production"
+          issue-body: "Please review the planned changes and approve if everything looks correct."
+
+      - name: Terraform apply
+        run: terraform apply tfplan
