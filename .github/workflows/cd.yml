@@ -3,7 +3,7 @@ name: CD
 on:
   push:
     branches:
-      - 3-require-manual-approval-for-terraform-apply
+      - main
 
 jobs:
   terraform:
