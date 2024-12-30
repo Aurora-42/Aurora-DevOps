@@ -9,6 +9,5 @@ A project to learn GitHub Actions CI/CD pipeline with Terraform.
     * Login to Azure with `az login`
     * Set environment variables
         * `export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"`
-        * `export TF_VAR_location="brazilsouth"`
 
 You can now run `terraform init` and start building your infrastructure.
