@@ -51,11 +51,39 @@ resource "azurerm_resource_group" "aurora" {
 }
 
 resource "azurerm_container_registry" "aurora" {
-  name                     = "aurora${var.environment}42"
+  name                     = "aurora${var.environment}42" # Global unique name
   resource_group_name      = azurerm_resource_group.aurora.name
   location                 = azurerm_resource_group.aurora.location
   sku                      = "Basic"
   admin_enabled            = true
+  tags = {
+    Environment = var.environment
+  }
+}
+
+resource "azurerm_container_group" "aurora" {
+  name                = "aurora-${var.environment}-cg"
+  resource_group_name = azurerm_resource_group.aurora.name
+  location            = azurerm_resource_group.aurora.location
+  os_type             = "Linux"
+
+  image_registry_credential {
+    server   = azurerm_container_registry.aurora.login_server
+    username = azurerm_container_registry.aurora.admin_username
+    password = azurerm_container_registry.aurora.admin_password
+  }
+
+  container {
+    name   = "aurora"
+    image  = "${azurerm_container_registry.aurora.login_server}/aurora:latest"
+    cpu    = "0.5"
+    memory = "1.5"
+    ports {
+      port     = 8080
+      protocol = "TCP"
+    }
+  }
+
   tags = {
     Environment = var.environment
   }
