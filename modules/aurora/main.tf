@@ -14,6 +14,8 @@ provider "azurerm" {
   features {}
 }
 
+# Resource group for the Terraform state
+# This is used by the Terraform azurerm backend to store the Terraform state files
 resource "azurerm_resource_group" "tfstate" {
   name     = "tfstate-${var.environment}-rg"
   location = var.location
@@ -39,9 +41,21 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
+# Resource group for the Aurora infrastructure
 resource "azurerm_resource_group" "aurora" {
   name     = "aurora-${var.environment}-rg"
   location = var.location
+  tags = {
+    Environment = var.environment
+  }
+}
+
+resource "azurerm_container_registry" "aurora" {
+  name                     = "aurora${var.environment}42"
+  resource_group_name      = azurerm_resource_group.aurora.name
+  location                 = azurerm_resource_group.aurora.location
+  sku                      = "Basic"
+  admin_enabled            = true
   tags = {
     Environment = var.environment
   }
