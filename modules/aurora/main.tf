@@ -7,6 +7,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "4.14.0"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "3.0.2"
+    }
   }
 }
 
@@ -87,4 +91,20 @@ resource "azurerm_container_group" "aurora" {
   tags = {
     Environment = var.environment
   }
+}
+
+# This application is used to grant the GitHub Actions workflow
+# necessary permissions to push to the container registry
+resource "azuread_application" "github_actions" {
+  display_name = "github-actions-${var.environment}"
+}
+
+resource "azuread_service_principal" "github_actions" {
+  client_id = azuread_application.github_actions.client_id
+}
+
+resource "azurerm_role_assignment" "acr_push" {
+  scope                = azurerm_container_registry.aurora.id
+  role_definition_name = "AcrPush"
+  principal_id         = azuread_service_principal.github_actions.object_id
 }
