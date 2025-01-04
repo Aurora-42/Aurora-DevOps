@@ -18,3 +18,8 @@ module "aurora" {
     environment = "prod"
     location = "brazilsouth"
 }
+
+output "github_actions_credentials" {
+  value     = module.aurora.github_actions_credentials
+  sensitive = true
+}

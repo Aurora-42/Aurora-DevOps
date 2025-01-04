@@ -103,6 +103,10 @@ resource "azuread_service_principal" "github_actions" {
   client_id = azuread_application.github_actions.client_id
 }
 
+resource "azuread_service_principal_password" "github_actions" {
+  service_principal_id = azuread_service_principal.github_actions.id
+}
+
 resource "azurerm_role_assignment" "acr_push" {
   scope                = azurerm_container_registry.aurora.id
   role_definition_name = "AcrPush"
