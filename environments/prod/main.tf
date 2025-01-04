@@ -19,7 +19,12 @@ module "aurora" {
     location = "brazilsouth"
 }
 
-output "github_actions_credentials" {
-  value     = module.aurora.github_actions_credentials
+output "github_actions_terraform_apply_credentials" {
+  value     = module.aurora.github_actions_terraform_apply_credentials
+  sensitive = true
+}
+
+output "github_actions_acr_push_credentials" {
+  value     = module.aurora.github_actions_acr_push_credentials
   sensitive = true
 }

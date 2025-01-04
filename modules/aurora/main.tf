@@ -93,22 +93,40 @@ resource "azurerm_container_group" "aurora" {
   }
 }
 
-# This application is used to grant the GitHub Actions workflow
-# necessary permissions to push to the container registry
-resource "azuread_application" "github_actions" {
-  display_name = "github-actions-${var.environment}"
+# Give GitHub Actions permissions to apply Terraform changes
+resource "azuread_application" "github_actions_terraform_apply" {
+  display_name = "github-actions-terraform-apply"
 }
 
-resource "azuread_service_principal" "github_actions" {
-  client_id = azuread_application.github_actions.client_id
+resource "azuread_service_principal" "github_actions_terraform_apply" {
+  client_id = azuread_application.github_actions_terraform_apply.client_id
 }
 
-resource "azuread_service_principal_password" "github_actions" {
-  service_principal_id = azuread_service_principal.github_actions.id
+resource "azuread_service_principal_password" "github_actions_terraform_apply" {
+  service_principal_id = azuread_service_principal.github_actions_terraform_apply.id
+}
+
+resource "azurerm_role_assignment" "terraform_apply" {
+  scope                = azurerm_resource_group.aurora.id
+  role_definition_name = "Owner"
+  principal_id         = azuread_service_principal.github_actions_terraform_apply.object_id
+}
+
+# Give GitHub Actions permissions to push to the container registry
+resource "azuread_application" "github_actions_acr_push" {
+  display_name = "github-actions-acr-push"
+}
+
+resource "azuread_service_principal" "github_actions_acr_push" {
+  client_id = azuread_application.github_actions_acr_push.client_id
+}
+
+resource "azuread_service_principal_password" "github_actions_acr_push" {
+  service_principal_id = azuread_service_principal.github_actions_acr_push.id
 }
 
 resource "azurerm_role_assignment" "acr_push" {
   scope                = azurerm_container_registry.aurora.id
   role_definition_name = "AcrPush"
-  principal_id         = azuread_service_principal.github_actions.object_id
+  principal_id         = azuread_service_principal.github_actions_acr_push.object_id
 }
