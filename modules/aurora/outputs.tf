@@ -1,5 +1,3 @@
-data "azurerm_subscription" "current" {}
-
 output "github_actions_terraform_credentials" {
   value = {
     client_id       = azuread_application.github_actions_terraform.client_id

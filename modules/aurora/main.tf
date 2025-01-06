@@ -68,23 +68,11 @@ resource "azuread_service_principal_password" "github_actions_terraform" {
   service_principal_id = azuread_service_principal.github_actions_terraform.id
 }
 
+data "azurerm_subscription" "current" {}
+
 # Give GitHub Actions permissions to read to the Terraform state storage account
-resource "azurerm_role_assignment" "terraform_storage_reader" {
-  scope                = data.azurerm_storage_account.tfstate.id
-  role_definition_name = "Reader"
-  principal_id         = azuread_service_principal.github_actions_terraform.object_id
-}
-
-# Give GitHub Actions permissions to write to the Terraform state storage account
-resource "azurerm_role_assignment" "terraform_storage_operator" {
-  scope                = data.azurerm_storage_account.tfstate.id
-  role_definition_name = "Storage Account Key Operator Service Role"
-  principal_id         = azuread_service_principal.github_actions_terraform.object_id
-}
-
-# Give GitHub Actions permissions to read and write to the Aurora infrastructure
-resource "azurerm_role_assignment" "terraform_aurora" {
-  scope                = azurerm_resource_group.aurora.id
+resource "azurerm_role_assignment" "github_actions_terraform" {
+  scope                = data.azurerm_subscription.current.id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.github_actions_terraform.object_id
 }
