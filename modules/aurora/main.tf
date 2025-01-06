@@ -50,7 +50,12 @@ resource "azurerm_container_registry" "aurora" {
 #   }
 # }
 
-# Give GitHub Actions permissions to apply Terraform changes
+data "azurerm_storage_account" "tfstate" {
+  name = "tfstate${var.environment}aurora42"
+  resource_group_name = "tfstate-${var.environment}-rg"
+}
+
+# Create a GitHub Actions service principal for Terraform
 resource "azuread_application" "github_actions_terraform" {
   display_name = "github-actions-${var.environment}-terraform"
 }
@@ -63,13 +68,21 @@ resource "azuread_service_principal_password" "github_actions_terraform" {
   service_principal_id = azuread_service_principal.github_actions_terraform.id
 }
 
+# Give GitHub Actions permissions to read and write to the Terraform state storage account
+resource "azurerm_role_assignment" "terraform_storage" {
+  scope                = data.azurerm_storage_account.tfstate.id
+  role_definition_name = "Storage Account Key Operator Service Role"
+  principal_id         = azuread_service_principal.github_actions_terraform.object_id
+}
+
+# Give GitHub Actions permissions to read and write to the Aurora infrastructure
 resource "azurerm_role_assignment" "terraform" {
   scope                = azurerm_resource_group.aurora.id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.github_actions_terraform.object_id
 }
 
-# Give GitHub Actions permissions to push to the container registry
+# Create a GitHub Actions service principal for ACR push
 resource "azuread_application" "github_actions_acr_push" {
   display_name = "github-actions-${var.environment}-acr-push"
 }
@@ -82,6 +95,7 @@ resource "azuread_service_principal_password" "github_actions_acr_push" {
   service_principal_id = azuread_service_principal.github_actions_acr_push.id
 }
 
+# Give GitHub Actions permissions to push to the container registry
 resource "azurerm_role_assignment" "acr_push" {
   scope                = azurerm_container_registry.aurora.id
   role_definition_name = "AcrPush"
