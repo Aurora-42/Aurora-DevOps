@@ -1,4 +1,11 @@
 terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "4.14.0"
+    }
+  }
+
   # Backend configuration determines where Terraform stores its state files.
   # State files are used to track the current state of your infrastructure.
   # Using a backend instead of local state is essential for team collaboration.
@@ -12,15 +19,22 @@ terraform {
   }
 }
 
-module "aurora" {
-    source = "../../modules/aurora"
+module "tfstate" {
+  source = "../../modules/tfstate"
 
-    environment = "prod"
-    location = "brazilsouth"
+  environment = "prod"
+  location = "brazilsouth"
 }
 
-output "github_actions_terraform_apply_credentials" {
-  value     = module.aurora.github_actions_terraform_apply_credentials
+module "aurora" {
+  source = "../../modules/aurora"
+
+  environment = "prod"
+  location = "brazilsouth"
+}
+
+output "github_actions_terraform_credentials" {
+  value     = module.aurora.github_actions_terraform_credentials
   sensitive = true
 }
 
