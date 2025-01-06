@@ -76,7 +76,7 @@ resource "azurerm_role_assignment" "terraform_storage" {
 }
 
 # Give GitHub Actions permissions to read and write to the Aurora infrastructure
-resource "azurerm_role_assignment" "terraform" {
+resource "azurerm_role_assignment" "terraform_aurora" {
   scope                = azurerm_resource_group.aurora.id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.github_actions_terraform.object_id
