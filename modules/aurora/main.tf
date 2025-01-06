@@ -20,6 +20,12 @@ resource "azurerm_role_assignment" "github_actions_terraform" {
   principal_id         = azuread_service_principal.github_actions_terraform.object_id
 }
 
+# Grant Application Administrator role to the Terraform service principal in Azure AD
+resource "azuread_directory_role_assignment" "github_actions_terraform_app_admin" {
+  role_id             = "9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3" # Application Administrator role ID
+  principal_object_id = azuread_service_principal.github_actions_terraform.object_id
+}
+
 # Resource group for the Aurora infrastructure
 resource "azurerm_resource_group" "aurora" {
   name     = "${var.environment}-aurora-rg"
