@@ -1,8 +1,14 @@
 terraform {
+  required_version = "1.10.3"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "4.14.0"
+    }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "3.0.2"
     }
   }
 
@@ -12,33 +18,27 @@ terraform {
   # Note: You must first create the resource group, storage account, and container
   #       before creating the backend configuration.
   backend "azurerm" {
-    resource_group_name  = "tfstate-prod-rg"
+    resource_group_name  = "tfstate-prod-aurora-rg"
     storage_account_name = "tfstateprodaurora42"
     container_name       = "tfstate"
     key                  = "prod/terraform.tfstate"
   }
 }
 
+provider "azurerm" {
+  features {}
+}
+
 module "tfstate" {
   source = "../../modules/tfstate"
 
-  environment = "prod"
-  location = "brazilsouth"
+  environment = var.environment
+  location    = var.location
 }
 
 module "aurora" {
   source = "../../modules/aurora"
 
-  environment = "prod"
-  location = "brazilsouth"
-}
-
-output "github_actions_terraform_credentials" {
-  value     = module.aurora.github_actions_terraform_credentials
-  sensitive = true
-}
-
-output "github_actions_acr_push_credentials" {
-  value     = module.aurora.github_actions_acr_push_credentials
-  sensitive = true
+  environment = var.environment
+  location    = var.location
 }
