@@ -33,22 +33,22 @@ resource "azurerm_container_registry" "aurora" {
   sku                 = "Standard"
 }
 
-# Create a GitHub Actions service principal for AcrPush workflow
-resource "azuread_application" "github_actions_acr_push" {
-  display_name = "github-actions-${var.environment}-aurora-acr-push"
-}
-
-resource "azuread_service_principal" "github_actions_acr_push" {
-  client_id = azuread_application.github_actions_acr_push.client_id
-}
-
-resource "azuread_service_principal_password" "github_actions_acr_push" {
-  service_principal_id = azuread_service_principal.github_actions_acr_push.id
-}
-
-# Give GitHub Actions permissions to the subscription
-resource "azurerm_role_assignment" "github_actions_acr_push" {
-  scope                = azurerm_container_registry.aurora.id
-  role_definition_name = "AcrPush"
-  principal_id         = azuread_service_principal.github_actions_acr_push.object_id
-}
+# # Create a GitHub Actions service principal for AcrPush workflow
+# resource "azuread_application" "github_actions_acr_push" {
+#   display_name = "github-actions-${var.environment}-aurora-acr-push"
+# }
+# 
+# resource "azuread_service_principal" "github_actions_acr_push" {
+#   client_id = azuread_application.github_actions_acr_push.client_id
+# }
+# 
+# resource "azuread_service_principal_password" "github_actions_acr_push" {
+#   service_principal_id = azuread_service_principal.github_actions_acr_push.id
+# }
+# 
+# # Give GitHub Actions permissions to the subscription
+# resource "azurerm_role_assignment" "github_actions_acr_push" {
+#   scope                = azurerm_container_registry.aurora.id
+#   role_definition_name = "AcrPush"
+#   principal_id         = azuread_service_principal.github_actions_acr_push.object_id
+# }
