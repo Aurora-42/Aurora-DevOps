@@ -36,6 +36,12 @@ module "tfstate" {
   location    = var.location
 }
 
+module "github_actions_terraform" {
+  source = "../../modules/github-actions-terraform"
+
+  environment = var.environment
+}
+
 module "aurora" {
   source = "../../modules/aurora"
 
